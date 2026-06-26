@@ -1,4 +1,4 @@
-66import crypto from "crypto";
+import crypto from "crypto";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { requireAuthenticatedUser } from "@/lib/server/auth";
 import { getEmailConfigStatus, sendEmail } from "@/lib/server/email";
