@@ -1,4 +1,4 @@
-import { getAdminDb } from "@/lib/firebase/admin";
+﻿import { getAdminDb } from "@/lib/firebase/admin";
 import { canJoinChallenge } from "@/lib/challenge-status";
 import { requireRequestUser } from "@/lib/server/auth";
 import { createNotification } from "@/lib/server/notifications";
@@ -23,7 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const participantSnap = await transaction.get(participantRef);
       if (participantSnap.exists) return { alreadyJoined: true };
       const now = new Date().toISOString();
-      transaction.set(participantRef, { id: participantRef.id, challengeId: id, userId: user.uid, status: "joined", joinedAt: now });
+      transaction.set(participantRef, { id: participantRef.id, challengeId: id, userId: user.uid, status: "registered", joinedAt: now });
       transaction.set(challengeRef, { participantCount: Number(challenge.participantCount ?? 0) + 1, updatedAt: now }, { merge: true });
       return { alreadyJoined: false };
     });
@@ -35,3 +35,4 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   await createNotification(db, { userId: user.uid, type: "challenge_joined", title: "Challenge joined", body: result.alreadyJoined ? "You were already joined." : "You successfully joined the challenge.", targetId: id });
   return ok(result, result.alreadyJoined ? "You already joined this challenge." : "Challenge joined successfully.");
 }
+

@@ -1,3 +1,4 @@
+﻿import { normalizeChallengeLifecycleStatus } from "@/lib/challenge-status";
 import type { Challenge, Submission, SubmissionType, UserPlanId } from "@/lib/types";
 
 export type ChallengeApiRecord = Omit<Partial<Challenge>, "type"> & {
@@ -35,7 +36,7 @@ export function normalizeChallenge(record: ChallengeApiRecord): Challenge {
     endsAt: toDateInput(record.endsAt),
     registrationDeadline: toDateInput(record.registrationDeadline),
     participants: record.participants ?? record.participantCount ?? 0,
-    status: record.status === "completed" || record.status === "active" ? record.status : "upcoming",
+    status: normalizeChallengeLifecycleStatus(record.status) === "completed" ? "completed" : normalizeChallengeLifecycleStatus(record.status) === "active" || normalizeChallengeLifecycleStatus(record.status) === "submission_open" || normalizeChallengeLifecycleStatus(record.status) === "voting_open" ? "active" : "upcoming",
     rules: record.rules ?? [],
     ageRestriction: record.ageRestriction,
     timeLimitedUploads: record.timeLimitedUploads,
@@ -50,6 +51,7 @@ export type SubmissionApiRecord = Omit<Partial<Submission>, "mediaType"> & {
   userDisplayName?: string;
   userPlanId?: UserPlanId;
   mediaType?: SubmissionType | string;
+  status?: string;
 };
 
 export function normalizeSubmission(record: SubmissionApiRecord, challenge?: Challenge): Submission & { userPlanId?: UserPlanId } {
@@ -66,8 +68,10 @@ export function normalizeSubmission(record: SubmissionApiRecord, challenge?: Cha
     challengeTitle: record.challengeTitle ?? challenge?.title ?? "",
     challengeCategory: record.challengeCategory ?? challenge?.category ?? "",
     likes: Number(record.likes ?? record.voteCount ?? record.weightedVoteCount ?? 0),
-    isWinner: record.isWinner,
+    isWinner: Boolean(record.isWinner || record.status === "winner"),
     createdAt: record.createdAt ?? "",
     userPlanId: record.userPlanId
   };
 }
+
+

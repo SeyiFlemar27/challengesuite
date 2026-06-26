@@ -1,4 +1,4 @@
-import { getAdminDb } from "@/lib/firebase/admin";
+﻿import { getAdminDb } from "@/lib/firebase/admin";
 import { ok, serverUnavailable } from "@/lib/server/responses";
 
 type WinnerResult = Record<string, unknown>;
@@ -23,7 +23,11 @@ async function enrichWinner(db: NonNullable<ReturnType<typeof getAdminDb>>, subm
     challengeCategory: submission.challengeCategory ?? challenge?.category ?? "",
     challengeEndsAt: challenge?.endsAt ?? null,
     prizeType: challenge?.prizeType ?? null,
-    prizePool: challenge?.prizePool ?? null,
+    prizePool: null,
+    prizeDisplayStatus: "foundation_only",
+    payoutStatus: String(submission.payoutStatus ?? "not_active"),
+    fundingReleaseStatus: "not_active",
+    cashPayoutsEnabled: false,
     userName: submission.userName ?? profile?.displayName ?? "Participant",
     userInitials: submission.userInitials ?? profile?.initials ?? "??",
     userPlanId: submission.userPlanId ?? profile?.planId ?? undefined
@@ -67,3 +71,4 @@ export async function GET() {
 
   return ok({ winners: derived.filter(Boolean) }, "Winners loaded.");
 }
+

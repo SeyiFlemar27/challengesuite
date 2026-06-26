@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -7,6 +7,7 @@ import { CheckCircle2, Rocket } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth-provider";
 import { Button, Card, LinkButton, PageTitle } from "@/components/ui";
+import { isChallengeEligibleForBoost } from "@/lib/challenge-status";
 import { boostChallenge, fetchBoostPackages, fetchChallengeDetails } from "@/lib/api/services";
 import { normalizeChallenge, type ChallengeApiRecord } from "@/lib/api/normalizers";
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
@@ -53,8 +54,7 @@ export default function BoostChallengePage() {
   const boost = boostPackages.find((item) => item.id === selectedId) ?? boostPackages[0];
   const walletBalance = currentUser.user?.doroBalance ?? 0;
   const boostCost = Number(boost?.coins ?? 0);
-  const eligibleStatuses = ["published", "registration_open", "active", "voting"];
-  const eligible = Boolean(rawChallenge && eligibleStatuses.includes(String(rawChallenge.status ?? "")));
+  const eligible = Boolean(rawChallenge && isChallengeEligibleForBoost(rawChallenge.status));
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -186,3 +186,5 @@ export default function BoostChallengePage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return <div className="rounded-[8px] bg-black/30 p-4"><div className="text-sm font-bold text-slate-400">{label}</div><div className="mt-1 text-2xl font-black">{value}</div></div>;
 }
+
+

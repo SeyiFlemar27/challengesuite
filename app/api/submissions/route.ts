@@ -1,4 +1,4 @@
-import { getAdminDb } from "@/lib/firebase/admin";
+﻿import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRequestUser } from "@/lib/server/auth";
 import { createNotification } from "@/lib/server/notifications";
 import { ok, serverUnavailable, fail, readJson, validationError } from "@/lib/server/responses";
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     caption: body.caption ?? "",
     mediaUrl: body.mediaUrl,
     mediaType,
-    status: "pending_approval",
+    status: "pending_review",
     voteCount: 0,
     weightedVoteCount: 0,
     createdAt: now,
@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     const freshChallengeSnap = await transaction.get(challengeRef);
     transaction.set(challengeRef, { submissionCount: Number(freshChallengeSnap.data()?.submissionCount ?? 0) + 1, updatedAt: now }, { merge: true });
   });
-  await createNotification(db, { userId: user.uid, type: "submission_uploaded", title: "Submission uploaded", body: "Your submission is pending approval.", targetId: ref.id });
-  return ok({ submission }, "Submission uploaded and pending approval.");
+  await createNotification(db, { userId: user.uid, type: "submission_uploaded", title: "Submission uploaded", body: "Your submission is pending review.", targetId: ref.id });
+  return ok({ submission }, "Submission uploaded and pending review.");
 }
+

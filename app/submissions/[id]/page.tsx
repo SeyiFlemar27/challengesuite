@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import { ConsentDialog } from "@/components/consent-dialog";
 import { PremiumBadge } from "@/components/brand";
 import { fetchSubmissionDetails, voteForSubmission } from "@/lib/api/services";
 import { normalizeChallenge, normalizeSubmission, type ChallengeApiRecord, type SubmissionApiRecord } from "@/lib/api/normalizers";
-import { canVoteOnChallenge } from "@/lib/challenge-status";
+import { canVoteOnChallenge, isSubmissionUnavailableForVoting, normalizeSubmissionLifecycleStatus } from "@/lib/challenge-status";
 import type { UserPlanId } from "@/lib/types";
 
 type CreatorRecord = {
@@ -92,8 +92,8 @@ export default function SubmissionPage() {
     );
   }
 
-  const status = String((details?.submission as Record<string, unknown> | undefined)?.status ?? "approved");
-  const unavailableStatus = ["pending_approval", "rejected", "removed", "private", "withdrawn"].includes(status);
+  const status = normalizeSubmissionLifecycleStatus((details?.submission as Record<string, unknown> | undefined)?.status ?? "approved");
+  const unavailableStatus = isSubmissionUnavailableForVoting(status);
   const creatorName = creator.displayName ?? submission.userName;
   const creatorInitials = creator.initials ?? submission.userInitials;
   const creatorPlan = creator.planId ?? submission.userPlanId;
@@ -133,3 +133,4 @@ export default function SubmissionPage() {
     </AppShell>
   );
 }
+

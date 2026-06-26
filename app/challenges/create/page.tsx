@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { Button, Card, Field, inputClass, LinkButton, PageTitle, textareaClass }
 import { redistributeSponsorship } from "@/lib/legal";
 import { challengeSchema } from "@/lib/validation";
 
-const steps = ["Basic Details", "Format & Rules", "Dates & Eligibility", "Prize & Monetization", "Media", "Preview & Publish"];
+const steps = ["Basic Details", "Format & Rules", "Dates & Eligibility", "Prize Foundation", "Media", "Preview & Publish"];
 
 export default function CreateChallengePage() {
   return (
@@ -44,8 +44,8 @@ function CreateChallengeWizard() {
     competitionFormat: "Entry Competition",
     bestOf: "1 Rounder",
     submissionTypes: ["image"],
-    prizeType: "Cash Jackpot",
-    entryFee: "10"
+    prizeType: "Bragging Rights (Leaderboard Ranking)",
+    entryFee: "0"
   });
   const [allocations, setAllocations] = useState([
     { bucket: "Platform ROI", percent: 12, enabled: true },
@@ -68,7 +68,7 @@ function CreateChallengeWizard() {
     if (step === 0 && (!form.title.trim() || !form.description.trim())) return "Title and description are required.";
     if (step === 0 && form.category === "Other" && !form.customCategory.trim()) return "Custom category is required.";
     if (step === 1 && form.submissionTypes.length === 0) return "Select at least one submission type.";
-    if (step === 3 && !braggingRights && Number(form.entryFee) <= 0) return "Entry fee must be greater than $0 unless Bragging Rights is selected.";
+    if (step === 3 && !braggingRights && Number(form.entryFee) > 0) return "Paid-entry prize pools are not active yet. Keep entry fee at $0 for now.";
     return "";
   }
 
@@ -91,7 +91,7 @@ function CreateChallengeWizard() {
       competitionFormat: form.competitionFormat,
       bestOf: form.bestOf,
       prizeType: form.prizeType,
-      entryFee: braggingRights ? null : Number(form.entryFee),
+      entryFee: 0,
       registrationDeadline: "2026-01-22",
       startsAt: "2026-01-24",
       endsAt: "2026-02-01"
@@ -108,8 +108,8 @@ function CreateChallengeWizard() {
       <AppShell>
         <Card className="mx-auto max-w-2xl p-10 text-center">
           <CheckCircle2 className="mx-auto h-20 w-20 text-emerald-400" />
-          <h1 className="mt-6 text-4xl font-black">Challenge Published</h1>
-          <p className="mt-3 text-slate-300">Your challenge is now ready for participants, voting, and media submissions.</p>
+          <h1 className="mt-6 text-4xl font-black">Challenge Submitted for Review</h1>
+          <p className="mt-3 text-slate-300">Your challenge was saved for review. Paid-entry prize pools, cash payouts, and sponsor funding release are not active yet.</p>
           <div className="mt-8 flex justify-center gap-3">
             <LinkButton href="/challenges">View Challenges</LinkButton>
             <LinkButton href="/my-challenges" variant="secondary">My Challenges</LinkButton>
@@ -165,7 +165,7 @@ function StepDates() {
 }
 
 function StepPrize({ form, update, braggingRights, normalized, setAllocations }: { form: any; update: any; braggingRights: boolean; normalized: any[]; setAllocations: any }) {
-  return <section><h2 className="text-2xl font-black">Step 4: Prize & Monetization</h2><div className="mt-6 grid gap-6 md:grid-cols-2"><Field label="Prize Type"><select className={inputClass} value={form.prizeType} onChange={(event) => update("prizeType", event.target.value)}><option>Cash Jackpot</option><option>DoroCoin</option><option>Product Prize</option><option>Bragging Rights (Leaderboard Ranking)</option></select></Field>{!braggingRights ? <Field label="Entry Fee ($)"><input className={inputClass} type="number" min="0.01" value={form.entryFee} onChange={(event) => update("entryFee", event.target.value)} /></Field> : <Card className="p-4 text-slate-300">Payout and entry fee fields are hidden for Bragging Rights competitions.</Card>}</div><div className="mt-6 rounded-[8px] border border-blue-500/30 bg-blue-950/20 p-5"><label className="font-bold"><input className="mr-3" type="checkbox" /> Enable Sponsorship Collaboration</label><div className="mt-5 grid gap-4 md:grid-cols-3">{normalized.map((bucket, index) => <label key={bucket.bucket} className="rounded-[8px] bg-black/40 p-4 text-sm"><input className="mr-2" type="checkbox" checked={bucket.enabled} onChange={() => setAllocations((items: any[]) => items.map((item: any, i: number) => i === index ? { ...item, enabled: !item.enabled } : item))} /> {bucket.bucket}: <b>{bucket.percent}%</b></label>)}</div></div></section>;
+  return <section><h2 className="text-2xl font-black">Step 4: Prize Foundation</h2><div className="mt-6 grid gap-6 md:grid-cols-2"><Field label="Prize Type"><select className={inputClass} value={form.prizeType} onChange={(event) => update("prizeType", event.target.value)}><option>Bragging Rights (Leaderboard Ranking)</option><option>Product Prize</option><option>DoroCoin</option><option>Cash Jackpot (Locked)</option></select></Field>{!braggingRights ? <Field label="Entry Fee ($) - Locked"><input className={inputClass} type="number" min="0" value="0" disabled /></Field> : <Card className="p-4 text-slate-300">Paid-entry prize pools and payout setup are not active yet.</Card>}</div><div className="mt-6 rounded-[8px] border border-blue-500/30 bg-blue-950/20 p-5"><label className="font-bold"><input className="mr-3" type="checkbox" /> Enable Sponsor Contribution Requests</label><div className="mt-5 grid gap-4 md:grid-cols-3">{normalized.map((bucket, index) => <label key={bucket.bucket} className="rounded-[8px] bg-black/40 p-4 text-sm"><input className="mr-2" type="checkbox" checked={bucket.enabled} onChange={() => setAllocations((items: any[]) => items.map((item: any, i: number) => i === index ? { ...item, enabled: !item.enabled } : item))} /> {bucket.bucket}: <b>{bucket.percent}%</b></label>)}</div><p className="mt-4 text-sm text-slate-400">Sponsor contribution requests are review-only. Funding, release, and payout movement are not active yet.</p></div></section>;
 }
 
 function StepMedia() {
@@ -175,3 +175,4 @@ function StepMedia() {
 function StepPreview({ form }: { form: any }) {
   return <section><h2 className="text-2xl font-black">Step 6: Preview & Publish</h2><div className="mt-6 grid gap-4 md:grid-cols-2">{Object.entries({ Title: form.title, Type: form.type, Category: form.category === "Other" ? form.customCategory : form.category, Format: form.competitionFormat, "Best Of": form.bestOf, "Prize Type": form.prizeType, "Submission Types": form.submissionTypes.join(", ") }).map(([label, value]) => <Card key={label} className="p-4"><div className="text-sm font-bold text-slate-400">{label}</div><div className="mt-1 text-lg font-black">{String(value)}</div></Card>)}</div></section>;
 }
+

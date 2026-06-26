@@ -1,4 +1,4 @@
-import type { SubscriptionPlan, UserPlanId } from "@/lib/types";
+﻿import type { SubscriptionPlan, UserPlanId } from "@/lib/types";
 
 export const subscriptionPlans: SubscriptionPlan[] = [
   {
@@ -21,7 +21,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     subtitle: "For active users",
     priceMonthly: 24.99,
     stripePriceEnv: "STRIPE_PRICE_CREATOR",
-    features: ["60 votes/month + 1 Multiplier", "Create up to 3 group challenges/mo", "Prize Pools up to $500", "1 Challenge Boost/month", "Comment & pin 1 comment"],
+    features: ["60 votes/month + 1 Multiplier", "Create up to 3 group challenges/mo", "Prize foundation review up to $500", "1 Challenge Boost/month", "Comment & pin 1 comment"],
     canHostLiveEvents: false,
     liveEventCapacity: 0,
     canManageTournaments: false,
@@ -34,7 +34,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     subtitle: "Serious creators",
     priceMonthly: 59.99,
     stripePriceEnv: "STRIPE_PRICE_COMPETITOR",
-    features: ["200 votes + 3 Multipliers", "Unlimited free group challenges", "Prize Pools up to $2,500 + Host 1v1", "Access to Ranked Challenges", "Host Small Live Events (10 pax)"],
+    features: ["200 votes + 3 Multipliers", "Unlimited free group challenges", "Prize foundation review up to $2,500 + Host 1v1", "Access to Ranked Challenges", "Host Small Live Events (10 pax)"],
     canHostLiveEvents: true,
     liveEventCapacity: 10,
     canManageTournaments: false,
@@ -48,7 +48,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     subtitle: "Event organizers",
     priceMonthly: 119,
     stripePriceEnv: "STRIPE_PRICE_EXECUTIVE_HOST",
-    features: ["500 votes + 5 Multipliers", "Prize Pools up to $10,000", "Create Tournament Brackets & 1v1", "Unlimited Challenge Boosts", "Host Mid-Scale Live Events (15 pax)"],
+    features: ["500 votes + 5 Multipliers", "Prize foundation review up to $10,000", "Create Tournament Brackets & 1v1", "Unlimited Challenge Boosts", "Host Mid-Scale Live Events (15 pax)"],
     canHostLiveEvents: true,
     liveEventCapacity: 15,
     canManageTournaments: true,
@@ -61,7 +61,7 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     subtitle: "Culture architect",
     priceMonthly: 249,
     stripePriceEnv: "STRIPE_PRICE_CHIEF_PRODUCER",
-    features: ["1,500 votes + Unlimited Multipliers", "Unlimited prize pools & events", "Sponsor-integrated challenges", "Tier-Restricted Special Events", "Host Large Live Events (25 pax)"],
+    features: ["1,500 votes + Unlimited Multipliers", "Prize pool foundation tools & events", "Sponsor/prize review tools", "Tier-Restricted Special Events", "Host Large Live Events (25 pax)"],
     canHostLiveEvents: true,
     liveEventCapacity: 25,
     canManageTournaments: true,
@@ -110,3 +110,4 @@ export function getSubscriptionPlansForUser(currentPlanId: unknown) {
     current: plan.id === normalizedPlanId
   }));
 }
+

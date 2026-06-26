@@ -1,5 +1,6 @@
-import { getAdminDb } from "@/lib/firebase/admin";
+﻿import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRequestUser } from "@/lib/server/auth";
+import { ensureCashWalletFoundation, normalizeCashWallet } from "@/lib/server/cash-wallet";
 import { ensureWallet } from "@/lib/server/dorocoin";
 import { ok, serverError, serverUnavailable } from "@/lib/server/responses";
 
@@ -23,9 +24,10 @@ export async function GET(request: Request) {
   if (!db) return serverUnavailable("Wallet");
 
   try {
-    const walletRef = await ensureWallet(db, user.uid);
-    const [walletSnap, profileSnap, userSnap, transactionSnap] = await Promise.all([
+    const [walletRef, cashWalletRef] = await Promise.all([ensureWallet(db, user.uid), ensureCashWalletFoundation(db, user.uid)]);
+    const [walletSnap, cashWalletSnap, profileSnap, userSnap, transactionSnap] = await Promise.all([
       walletRef.get(),
+      cashWalletRef.get(),
       db.collection("profiles").doc(user.uid).get(),
       db.collection("users").doc(user.uid).get(),
       db.collection("doroCoinTransactions").where("userId", "==", user.uid).orderBy("createdAt", "desc").limit(50).get()
@@ -47,8 +49,12 @@ export async function GET(request: Request) {
         userId: user.uid,
         balance: Number(wallet.balance ?? 0),
         lockedBalance: Number(wallet.lockedBalance ?? 0),
+        creditType: "dorocoin",
+        withdrawable: false,
+        cashConvertible: false,
         updatedAt: toIso(wallet.updatedAt)
       },
+      cashWallet: normalizeCashWallet(user.uid, cashWalletSnap.data()),
       transactions: transactionSnap.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -62,3 +68,6 @@ export async function GET(request: Request) {
     return serverError("Wallet could not be loaded.", error instanceof Error ? error.message : error);
   }
 }
+
+
+

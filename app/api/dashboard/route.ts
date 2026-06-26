@@ -1,3 +1,4 @@
+﻿import { isChallengeActiveForDashboard } from "@/lib/challenge-status";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRequestUser } from "@/lib/server/auth";
 import { ok, serverUnavailable } from "@/lib/server/responses";
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
       doroBalance: Number(wallet?.balance ?? 0)
     },
     stats: {
-      activeChallenges: challenges.filter((challenge) => ["published", "registration_open", "active", "voting"].includes(String(challenge.status))).length,
+      activeChallenges: challenges.filter((challenge) => isChallengeActiveForDashboard(challenge.status)).length,
       totalPoints: Number(profile?.totalPoints ?? account?.totalPoints ?? 0),
       badgeCount: badges.length,
       submissionCount: submissions.length
@@ -56,3 +57,4 @@ export async function GET(request: Request) {
     notifications
   }, "Dashboard loaded.");
 }
+

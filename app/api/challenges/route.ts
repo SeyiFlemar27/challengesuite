@@ -1,8 +1,10 @@
+import { getChallengeDisplayStatus } from "@/lib/challenge-status";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { requireRequestUser, requireRole } from "@/lib/server/auth";
+import { writeCashTransactionPlaceholder } from "@/lib/server/cash-transactions";
 import { createNotification } from "@/lib/server/notifications";
-import { ok, serverUnavailable, readJson, validationError } from "@/lib/server/responses";
-import { getChallengeDisplayStatus } from "@/lib/challenge-status";
+import { writeDisabledPrizePoolFoundation } from "@/lib/server/prize-pools";
+import { ok, readJson, serverUnavailable, validationError } from "@/lib/server/responses";
 
 export async function GET() {
   const db = getAdminDb();
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
     description: body.description,
     category: body.category,
     type: body.type ?? "public",
-    status: body.publish ? "published" : "draft",
+    status: body.publish ? "pending_review" : "draft",
     registrationDeadline: body.registrationDeadline,
     startsAt: body.startsAt,
     endsAt: body.endsAt,
@@ -49,8 +51,14 @@ export async function POST(request: Request) {
     acceptedSubmissionTypes: body.acceptedSubmissionTypes ?? ["image"],
     rules: body.rules ?? [],
     prizeType: body.prizeType ?? "Bragging Rights (Leaderboard Ranking)",
-    entryFee: Number(body.entryFee ?? 0),
-    prizePool: Number(body.prizePool ?? 0),
+    entryFee: 0,
+    entryFeeCents: 0,
+    paidEntryEnabled: false,
+    prizePool: 0,
+    prizePoolCents: 0,
+    prizePoolEnabled: false,
+    cashPayoutsEnabled: false,
+    payoutStatus: "not_applicable",
     participantCount: 0,
     submissionCount: 0,
     voteCount: 0,
@@ -59,7 +67,22 @@ export async function POST(request: Request) {
     createdAt: now,
     updatedAt: now
   };
-  await ref.set(challenge);
+  await Promise.all([
+    ref.set(challenge),
+    writeDisabledPrizePoolFoundation(db, ref.id, now),
+    writeCashTransactionPlaceholder(db, {
+      userId: user.uid,
+      type: "prize_placeholder_created",
+      status: "recorded",
+      amountCents: 0,
+      currency: "USD",
+      sourceType: "challenge",
+      sourceId: ref.id,
+      challengeId: ref.id,
+      description: `Prize foundation placeholder created for challenge ${ref.id}. No cash prize or payout movement is active.`,
+      now
+    })
+  ]);
   await createNotification(db, { userId: user.uid, type: "challenge_created", title: "Challenge saved", body: `${challenge.title} was ${challenge.status}.`, targetId: ref.id });
-  return ok({ challenge }, challenge.status === "published" ? "Challenge published." : "Challenge draft saved.");
+  return ok({ challenge }, challenge.status === "pending_review" ? "Challenge submitted for review." : "Challenge draft saved.");
 }

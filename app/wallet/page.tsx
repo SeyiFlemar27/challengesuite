@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { Coins, LockKeyhole, TrendingUp, Vote } from "lucide-react";
+import { Coins, LockKeyhole, ShieldCheck, TrendingUp, Vote } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button, Card, EmptyState, LinkButton, PageTitle } from "@/components/ui";
 import { money } from "@/lib/utils";
@@ -113,9 +113,9 @@ export default function WalletPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-        <PageTitle title="Wallet / DoroCoin" subtitle="Use DoroCoins for votes, challenge boosts, premium entries, and rewards." icon={<Coins className="text-[var(--gold)]" />} />
+        <PageTitle title="Wallet / DoroCoin" subtitle="DoroCoins are internal platform credits for votes, boosts, and future promotional features. They cannot be withdrawn or converted to cash." icon={<Coins className="text-[var(--gold)]" />} />
         <Card className="px-7 py-5 text-right">
-          <div className="text-sm font-bold text-slate-400">Available Balance</div>
+          <div className="text-sm font-bold text-slate-400">DoroCoin Balance</div>
           <div className="text-4xl font-black text-[var(--gold)]">{balance}</div>
         </Card>
       </div>
@@ -138,13 +138,14 @@ export default function WalletPage() {
         {[
           { icon: <Vote />, title: "Voting", body: "Buy additional votes for eligible submissions." },
           { icon: <TrendingUp />, title: "Boosting", body: "Increase challenge visibility for a fixed duration." },
-          { icon: <LockKeyhole />, title: "Premium Entries", body: "Join locked creator challenges when allowed." },
-          { icon: <Coins />, title: "Rewards", body: "Earn bonuses from wins, promos, and platform campaigns." }
+          { icon: <LockKeyhole />, title: "Internal Credits", body: "DoroCoins stay inside Challenge Suite and are not withdrawable." },
+          { icon: <ShieldCheck />, title: "Cash Wallet Separate", body: "Prize, payout, and refund foundations are review-only and not active yet." }
         ].map((item) => <Card key={item.title} className="p-5"><div className="text-[var(--gold)]">{item.icon}</div><h2 className="mt-3 text-xl font-black">{item.title}</h2><p className="mt-2 text-sm text-slate-300">{item.body}</p></Card>)}
       </div> : null}
 
       {!loading && !unauthenticated && !error ? <section className="mt-10">
         <h2 className="text-2xl font-black">Buy DoroCoins</h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-400">Purchases add internal DoroCoin credits only. DoroCoins have no cash value, cannot be withdrawn, and cannot be converted into payout balance.</p>
         {packages.length ? <div className="mt-5 grid gap-6 md:grid-cols-3">
           {packages.map((pack) => (
             <Card key={pack.id} className="p-6">
@@ -159,8 +160,21 @@ export default function WalletPage() {
         {status ? <p className={`mt-5 rounded-[8px] p-4 font-bold ${status.startsWith("Checkout started") ? "bg-emerald-950/40 text-emerald-200" : "bg-red-950/40 text-red-200"}`}>{status}</p> : null}
       </section> : null}
 
+
       {!loading && !unauthenticated && !error ? <section className="mt-10">
-        <h2 className="text-2xl font-black">Transaction History</h2>
+        <h2 className="text-2xl font-black">Cash / Payout Foundation</h2>
+        <Card className="mt-5 border-slate-700 bg-[#151515] p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-xl font-black"><ShieldCheck className="text-[var(--gold)]" /> Review-only foundation</div>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Cash wallets, prize winnings, creator/host earnings, refunds, and payouts are separate from DoroCoins. This foundation is locked for review states only; withdrawals, payout transfers, sponsor money release, and automatic refunds are not active yet.</p>
+            </div>
+            <div className="rounded-[8px] border border-white/10 bg-black/40 px-5 py-4 text-sm font-black text-slate-300">Withdrawals unavailable</div>
+          </div>
+        </Card>
+      </section> : null}
+      {!loading && !unauthenticated && !error ? <section className="mt-10">
+        <h2 className="text-2xl font-black">DoroCoin Transaction History</h2>
         <Card className="mt-5 overflow-hidden">
           {transactions.length ? transactions.map((txn) => (
             <div key={txn.id} className="grid gap-3 border-b border-white/10 p-5 md:grid-cols-[140px_1fr_120px_120px]">
@@ -169,9 +183,11 @@ export default function WalletPage() {
               <span className="font-bold">{formatType(txn.type)}</span>
               <span className={`text-right font-black ${txn.amount > 0 ? "text-emerald-300" : "text-red-300"}`}>{txn.amount > 0 ? "+" : ""}{txn.amount}</span>
             </div>
-          )) : <EmptyState icon={<Coins />} title="No transactions yet" body="Purchases, votes, boosts, rewards, and grants will appear here." />}
+          )) : <EmptyState icon={<Coins />} title="No transactions yet" body="DoroCoin purchases, votes, boosts, and admin grants will appear here." />}
         </Card>
       </section> : null}
     </AppShell>
   );
 }
+
+
