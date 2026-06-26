@@ -1,4 +1,4 @@
-import crypto from "crypto";
+66import crypto from "crypto";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { requireAuthenticatedUser } from "@/lib/server/auth";
 import { getEmailConfigStatus, sendEmail } from "@/lib/server/email";
@@ -47,9 +47,17 @@ export async function POST(request: Request) {
 
   const now = new Date();
   const recentSnap = await db.collection("emailVerificationOtps").where("userId", "==", user.uid).where("email", "==", user.email).where("usedAt", "==", null).limit(10).get();
-  const recent = recentSnap.docs
-    .map((doc) => ({ id: doc.id, ...doc.data() }))
-    .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))[0];
+  type RecentOtpAttempt = {
+      id: string;
+      createdAt?: string | number | Date | null;
+      };
+
+      const recent = recentSnap.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<RecentOtpAttempt, "id">),
+          }))
+          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))[0];
 
   if (recent?.createdAt) {
     const createdAt = new Date(String(recent.createdAt));
