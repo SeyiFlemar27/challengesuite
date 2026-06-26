@@ -34,9 +34,24 @@ export async function POST(request: Request) {
   if (!/^\d{6}$/.test(code)) return validationError({ code: "Enter the 6-digit code from your email." });
 
   const snap = await db.collection("emailVerificationOtps").where("userId", "==", user.uid).where("email", "==", user.email).where("usedAt", "==", null).limit(10).get();
-  const candidates = snap.docs
-    .map((doc) => ({ ref: doc.ref, id: doc.id, ...doc.data() }))
-    .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+  type EmailOtpCandidate = {
+    ref: FirebaseFirestore.DocumentReference;
+    id: string;
+    createdAt?: string | number | Date | null;
+    expiresAt?: string | number | Date | null;
+    hashedCode?: string;
+    attempts?: number;
+    usedAt?: string | number | Date | null;
+    };
+
+    const candidates = snap.docs
+    .map((doc) => ({
+      ref: doc.ref,
+      id: doc.id,
+      ...(doc.data() as Omit<EmailOtpCandidate, "ref" | "id">),
+      }))
+      .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+
   const record = candidates[0];
 
   if (!record) return fail("Your code has expired. Request a new one.", 410, undefined, "OTP_EXPIRED");
